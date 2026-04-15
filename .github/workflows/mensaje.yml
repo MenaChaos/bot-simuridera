@@ -1,17 +1,25 @@
 name: Enviar Mensaje Diario
 on:
   schedule:
-    # Esto se ejecuta todos los días a las 22:00 UTC (18:00 hora Chile)
-    - cron: '0 22 * * *'
-  workflow_dispatch: # Esto nos permite probarlo manualmente
+    - cron: '0 22 * * *' # 18:00 hora Chile
+  workflow_dispatch:
 
 jobs:
   enviar_webhook:
     runs-on: ubuntu-latest
     steps:
-      - name: Enviar mensaje a Discord
-        run: |
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d '{"content": "¿Se juega hoy? 🐶"}' \
-               ${{ secrets.DISCORD_WEBHOOK_URL }}
+      - name: Descargar código del repo
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Instalar librerías
+        run: pip install requests
+
+      - name: Ejecutar script de mensajes
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python mensajes.py
